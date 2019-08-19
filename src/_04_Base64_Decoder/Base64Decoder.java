@@ -2,6 +2,7 @@ package _04_Base64_Decoder;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
 import java.util.Base64;
 
 public class Base64Decoder {
@@ -50,17 +51,73 @@ public class Base64Decoder {
 	//   characters long and return an array of 3 bytes (24 bits). The byte 
 	//   array should be the binary value of the encoded characters.
 	public static byte[] convert4CharsTo24Bits(String s){
-		byte[] bs = new byte[4];
+		byte[] bs = new byte[3];
+		String binary = "";
 		for (int i = 0; i < s.length() && i < 4; i++)
 		{
-			s.charAt(i);
+			char c = s.charAt(i);
+			binary+=convertToBin(convertBase64Char(c));
 		}
-		return null;
+		bs[0] = (byte)convertToInt(binary.substring(0,8));
+		bs[1] = (byte)convertToInt(binary.substring(8,16));
+		bs[2] = (byte)convertToInt(binary.substring(16));
+		return bs;
+	}
+	
+	static int convertToInt(String curbin)
+	{
+		int total = 0;
+		for (int i = 0; i < curbin.length(); i++)
+		{
+			if (curbin.charAt(i) == '1')
+			{
+				int x = curbin.length() - i - 1;
+				total+=Math.pow(2.0, (double)x);
+			}
+		}
+		return total;
+	}
+	
+	static String convertToBin(int a)
+	{
+		int i = 0;
+		ArrayList<Integer> doubles = new ArrayList<Integer>();
+		while (Math.pow(2, i) <= a)
+		{
+			doubles.add((int)Math.pow(2, i));
+			i++;
+		}
+		String r = "";
+		for (int j = doubles.size() - 1; j >= 0; j--)
+		{
+			if (a - doubles.get(j) >= 0)
+			{
+				a-=doubles.get(j);
+				r+="1";
+			}
+			else r+="0";
+		}
+		while (r.length() < 6)
+		{
+			r = "0" + r;
+		}
+		return r;
 	}
 	
 	//3. Complete this method so that it takes in a string of any length
 	//   and returns the full byte array of the decoded base64 characters.
 	public static byte[] base64StringToByteArray(String file) {
-		return null;
+		byte[] bytes = new byte[(file.length()/4)*3];
+		int index = 0;
+		for (int i = 0; i <= file.length() - 4; i+=4)
+		{
+			byte[] bs = (convert4CharsTo24Bits(file.substring(i, i+4)));
+			for (byte b : bs)
+			{
+				bytes[index] = b;
+				index++;
+			}
+		}
+		return bytes;
 	}
 }
